@@ -7,7 +7,7 @@ def random_forest(num_of_features,features,group,group_mani,report,X_train, X_te
 
     dict1={'num of trees':0,'criterion':0,'min_samples_split':0,'recall':0,'confusion matrix':0}
     dict2={'recall':0,'confusion matrix':0}
-
+    print(num_of_features)
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = [executor.submit(algorithms.random_forest_, X_train, y_train, X_test,X_test_manipulated, n,criteria,  min_samples_split ) for n in range(20,301,20) for criteria in ['entropy','gini']  for min_samples_split in [3,11,21,51,101,201,401,601,801]]
     
@@ -127,7 +127,6 @@ def rotation_forest(group,group_mani,report,x_train, x_test,x_test_manipulated, 
     lock.acquire()
     write_to_csv(report, x1)
     lock.release()
-
 
 
 def kirin(group,group_mani,report,X_test,y_test,X_test_manipulated,y_test_manipulated):
