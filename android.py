@@ -4,62 +4,59 @@ from pathlib import Path
 import re
 import pandas as pd
 import numpy as np
+from androguard.misc import AnalyzeAPK
 
 
-def get_permissions():
-    os.chdir("niv_avi_files/samples")
-    print("running apktool")
+def get_permissions(filename, type, category, dir):
+    print("running androguard")
     perm_list = []
-    name_list = []
     files = []
-    for apk in Path('.').glob("*.apk"):
-        print("working on", apk)
-        files.append(str(apk)[0:len(str(apk))-4])
-        os.system("apktool d -f "+str(apk))
-        name_list.append(str(apk))
-
-    print(files)
-    new_f = open("perm.txt", "a")
     df = pd.DataFrame()
     first = 0
-    for fileManifest in files:
-        print("working of manifest for "+fileManifest)
-        f = open(fileManifest+"/AndroidManifest.xml", "r")
+    for apk in Path('./'+dir).glob("*.apk"):
+        print("working on "+str(apk))
+        a, d, dx = AnalyzeAPK(str(apk))
+        f = a.get_permissions()
         count = 0
         perm_list = []
         for line in f:
-            x = re.search('<uses-permission android:name="*"', line)
-            if x:
-                count = count + 1
-                apk_perms = pd.Series(line)
-                apk_perms = apk_perms.apply(lambda perm: "perm:" + perm[19:])
-                perm_list.append(' '.join(list(apk_perms)))
+            count = count + 1
+            apk_perms = pd.Series(line)
+            apk_perms = apk_perms.apply(lambda perm: "perm:" + perm[19:])
+            perm_list.append(' '.join(list(apk_perms)))
 
-        list_of_names = [fileManifest+".apk"]*count
-        tfidf = CountVectorizer(lowercase=False)
-        temp_list = tfidf.fit_transform(perm_list)
-        dfapp = pd.DataFrame.sparse.from_spmatrix(
-            temp_list, index=list_of_names, columns="perm: " + tfidf.get_feature_names_out())
-        dfapp.drop("perm: perm", axis=1, inplace=True)
-        dfapp.drop("perm: name", axis=1, inplace=True)
-        dfapp.drop("perm: android", axis=1, inplace=True)
-        # dfapp.to_csv(str(fileManifest)+"our_data.csv")
-        dfapp = dfapp.fillna(0)
-        if first == 0:
-            first = 1
-            df = dfapp
-        else:
-            df = df.combine_first(dfapp)
-            df = df.fillna(0)
-    df = df.assign(type=None)
+        list_of_names = [apk]*count
+        tfidf = CountVectorizer(stop_words=None, lowercase=False)
+        print(perm_list)
+        if len(perm_list) > 0:
+            temp_list = tfidf.fit_transform(perm_list)
+            dfapp = pd.DataFrame.sparse.from_spmatrix(
+                temp_list, index=list_of_names, columns="perm: " + tfidf.get_feature_names_out())
+            dfapp.drop("perm: perm", axis=1, inplace=True)
+            dfapp = dfapp.fillna(0)
+            if first == 0:
+                first = 1
+                df = dfapp
+            else:
+                df = df.combine_first(dfapp)
+                df = df.fillna(0)
+    df = df.assign(type=type)
     df = df.assign(group_num=None)
     df = df.assign(group_mani=None)
-    df = df.assign(category=None)
+    df = df.assign(category=category)
     df = df.assign(perm_rate=None)
     df = df.assign(call__=None)
     df = df.fillna(0)
-    df.to_csv("data.csv")
+    return df
 
 
-get_permissions()
-
+os.chdir("apks")
+df1 = get_permissions("train_bingn", 0, 0, "train_bingn")
+df2 = get_permissions("train_malware", 1, 0, "train_malware")
+df3 = get_permissions("test_bingn", 0, 1, "test_bingn")
+df4 = get_permissions("test_malware", 1, 1, "test_malware")
+df5 = get_permissions("test_manipulated", 1, 2, "test_manipulated")
+df1 = df1.combine_first(df2.combine_first(df3.combine_first(df4.combine_first(df5))))
+df1 = df1.fillna(0)
+df1.index.name = "name"
+df1.to_csv("all.csv")
