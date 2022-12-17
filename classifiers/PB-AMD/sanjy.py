@@ -1,6 +1,7 @@
 
 import reports 
 import machine 
+import algorithms
 import pandas as pd
 
 
@@ -39,12 +40,12 @@ def run(data,reports_):
             mani[group][mani_group].drop(columns=['name'])
             for num_of_features in [100,160]:
                 X_train,X_test,X_mani,y_train,y_test,y_mani,top_features=machine.get_X_y_features(num_of_features,features,group,t,train,m)
-                #print('Running random forest...')
-                #reports.random_forest( num_of_features, top_features,str(group),str(mani_group+1),reports_[0][0], X_train, X_test, X_mani,y_train, y_test,y_mani)
+                print('Running random forest...')
+                reports.random_forest( num_of_features, top_features,str(group),str(mani_group+1),reports_[0][0], X_train, X_test, X_mani,y_train, y_test,y_mani)
                 #print('Running cart...')
                 #reports.cart( num_of_features, top_features,str(group),str(mani_group+1), reports_[1][0],  X_train, X_test, X_mani,y_train, y_test,y_mani)
-                print('Running C45...')
-                reports.C45(num_of_features, top_features,str(group),str(mani_group+1),reports_[2][0], X_train, X_test, X_mani,y_train, y_test,y_mani)
+                #print('Running C45...')
+                #reports.C45(num_of_features, top_features,str(group),str(mani_group+1),reports_[2][0], X_train, X_test, X_mani,y_train, y_test,y_mani)
 
 
 
@@ -52,6 +53,7 @@ if __name__== "__main__":
 
     #getting paths
     data="data.csv"
-    reports_=""
+    reports_="" #"reports\\"
 	
-    run("data.csv",reports_)
+    #running the machine
+    run(data,reports_)
