@@ -1,15 +1,34 @@
 import numpy as np
+import re
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.cluster import KMeans
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+from sklearn.pipeline import make_pipeline
 
-def gradient_boosting_trees(X_train, y_train, X_test, X_test_manipulated, num, criterion, min_samples_split):
+
+
+def mlp_classifier(X_train, y_train, X_test, X_test_manipulated, num, criterion, min_samples_split):
+    # clf = MLPClassifier(solver='adam', alpha=1e-5,
+    #                     hidden_layer_sizes=(15, ), random_state=1, max_iter=301, warm_start=True)
+    clf = SVC(gamma='auto')
+    clf.fit(X_train, y_train)
+    return (clf.predict(X_test), clf.predict(X_test_manipulated), criterion, min_samples_split)
+
+
+def gradient_boosting_trees(X_train, y_train, X_test, y_test, X_test_manipulated, num, criterion, min_samples_split, features):
     clf = GradientBoostingClassifier(
         n_estimators=num, criterion=criterion, min_samples_split=min_samples_split)
     clf.fit(X_train, y_train)
+    # pipeline = Pipeline([('scaling', StandardScaler()), ('pca', PCA(n_components=5))])
+    # clf.fit(pipeline.fit_transform(X_train), pipeline.fit_transform(y_train))
     return (clf.predict(X_test), clf.predict(X_test_manipulated), num, criterion, min_samples_split)
+
 
 def pca_(X, n):
     pca = PCA(n_components=n)
@@ -21,20 +40,21 @@ def kmeans_(X, n_clusters=2):
     kmeans = KMeans(n_clusters=n_clusters)
     return kmeans.fit_predict(X)
 
-    #	X_train, y_train, X_test,X_test_manipulated, n,criteria,  max_depth
-
-
-def random_forest_(X_train, y_train, X_test, X_test_manipulated, num, criterion, min_samples_split):
-    clf = RandomForestClassifier(
-        n_estimators=num, criterion=criterion, min_samples_split=min_samples_split)
+def random_forest_(X_train, y_train, X_test, y_test, X_test_manipulated, num, criterion, min_samples_split, features):
+    clf = RandomForestClassifier(n_estimators=num,
+                                 criterion=criterion, min_samples_split=min_samples_split)
+    # clf = SVC(kernel="linear")
+    # clf = make_pipeline(StandardScaler(), LinearSVC(random_state=0, tol=1e-5, dual = True))
     clf.fit(X_train, y_train)
-    return (clf.predict(X_test), clf.predict(X_test_manipulated), num, criterion, min_samples_split)
+    return (clf.predict(X_test), clf.predict(X_test), num, criterion, min_samples_split)
+
 
 
 def decision_tree_(X_train, y_train, X_test, X_test_manipulated, criterion, min_samples_split):
     clf = DecisionTreeClassifier(
         criterion=criterion, min_samples_split=min_samples_split)
     clf.fit(X_train, y_train)
+
     return (clf.predict(X_test), clf.predict(X_test_manipulated), criterion, min_samples_split)
 
 
