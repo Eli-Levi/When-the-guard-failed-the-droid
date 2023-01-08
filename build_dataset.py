@@ -19,17 +19,20 @@ def dividedataset():
     df_m = df_m.sample(frac = 0.2)
     df_m.category = 0
     df_b.category = 0
+    print(len(df_b))
+    print(len(df_m))
     # split the benign into train and test
-    train_b = df_b.sample(frac = 0.8)
+    train_b = df_b.sample(frac = 0.6)
     train_b.category = 0
     test_b = df_b.drop(train_b.index)
     test_b.category = 1
+
     shuffled_train_b = train_b.sample(frac=1)
     result_train_b = np.array_split(shuffled_train_b, 5)
     shuffled_test_b = test_b.sample(frac=1)
     result_test_b = np.array_split(shuffled_test_b, 5)
     # split the malicious into train and test
-    train_m = df_m.sample(frac = 0.8)
+    train_m = df_m.sample(frac = 0.6)
     train_m.category = 0
     test_m = df_m.drop(train_m.index)
     test_m.category = 1
@@ -47,7 +50,7 @@ def dividedataset():
             train_b = result_train_b[i]
             test_b = result_test_b[i]
             train_m = result_train_m[i]
-            test_b = result_test_b[i]
+            test_m = result_test_m[i]
         else:
             train_b = train_b.combine_first(result_train_b[i])
             test_b = test_b.combine_first(result_test_b[i])

@@ -7,10 +7,17 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.cluster import KMeans
 from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import LinearSVC
-from sklearn.pipeline import make_pipeline
+from catboost import CatBoostClassifier
+from sklearn.model_selection import train_test_split
 
+
+def svc_classifier(X_train, y_train, X_test, y_test, X_test_manipulated, num, criterion, min_samples_split, features):
+    clf = CatBoostClassifier()
+    # Fit model
+    clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+    print(y_pred)
+    return (y_pred, y_pred, num, criterion,  min_samples_split)
 
 
 def mlp_classifier(X_train, y_train, X_test, X_test_manipulated, num, criterion, min_samples_split):
@@ -40,14 +47,28 @@ def kmeans_(X, n_clusters=2):
     kmeans = KMeans(n_clusters=n_clusters)
     return kmeans.fit_predict(X)
 
+
 def random_forest_(X_train, y_train, X_test, y_test, X_test_manipulated, num, criterion, min_samples_split, features):
+    # split the tests
+    X_test, X_test2, y_test, y_test2 = train_test_split(
+        X_test, y_test, test_size=0.5, random_state=0)
+
     clf = RandomForestClassifier(n_estimators=num,
                                  criterion=criterion, min_samples_split=min_samples_split)
-    # clf = SVC(kernel="linear")
-    # clf = make_pipeline(StandardScaler(), LinearSVC(random_state=0, tol=1e-5, dual = True))
     clf.fit(X_train, y_train)
-    return (clf.predict(X_test), clf.predict(X_test), num, criterion, min_samples_split)
-
+    y_pred = clf.predict(X_test)
+    print("First stage, num_estimators="+str(num))
+    clf2 = RandomForestClassifier(n_estimators=num,
+                                 criterion=criterion, min_samples_split=min_samples_split)
+    y_pred = np.reshape(y_pred, (-1, 1))
+    X_test = np.hstack((X_test, y_pred))
+    clf2.fit(X_test, y_test)
+    print("Second stage, num_estimators="+str(num))
+    y_pred = clf.predict(X_test2)
+    y_pred = np.reshape(y_pred, (-1, 1))
+    X_test2 = np.hstack((X_test2, y_pred))
+    y_pred = clf2.predict(X_test2)
+    return (y_pred, y_pred, num, criterion, min_samples_split, X_test2, y_test2)
 
 
 def decision_tree_(X_train, y_train, X_test, X_test_manipulated, criterion, min_samples_split):

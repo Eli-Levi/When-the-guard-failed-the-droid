@@ -3,12 +3,8 @@ import reports
 import machine
 import algorithms
 import pandas as pd
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn import preprocessing
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import RandomizedSearchCV
 
 
 def run(data, reports_):
@@ -28,25 +24,24 @@ def run(data, reports_):
 
     # getting the data needed for the machine to work
     data = pd.read_csv(data)
-
     data = machine.get_data(data, ['perm:'])
 
     # separating the data
 
     train, test, mani = machine.divide_data(data)
-    
+
     # running the machine
     features = []
     import feature_selection
     for i in range(5):
-        features.append(feature_selection.by_mean_decrease_impurity(train[i]))
+        features.append(feature_selection.model_based_selection(train[i]))
 
     for group in range(5):
         mani_group = 0
-        m, t = machine.keep_same_apks(mani[group][mani_group], test[group])
+        t, m = machine.keep_same_apks(test[group], mani[group][mani_group])
         mani[group][mani_group].drop(columns=['name'])
         n_of_f = 0
-        if group == 0 :
+        if group == 0:
             n_of_f = 200
         elif group == 1:
             n_of_f = 160
@@ -57,18 +52,18 @@ def run(data, reports_):
         elif group == 4:
             n_of_f = 200
 
-        for num_of_features in [n_of_f]:
+        for num_of_features in [110,160]:
             X_train, X_test, X_mani, y_train, y_test, y_mani, top_features = machine.get_X_y_features(
                 num_of_features, features, group, t, train, m)
             print('Running random forest...')
             reports.random_forest(num_of_features, top_features, str(group), str(
                 mani_group+1), reports_[0][0], X_train, X_test, X_mani, y_train, y_test, y_mani)
-            
+
 
 if __name__ == "__main__":
 
     # getting paths
-    data = "data.csv"
+    data = "dataset.csv"
     reports_ = ""  # "reports\\"
 
     # running the machine

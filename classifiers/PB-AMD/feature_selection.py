@@ -3,11 +3,53 @@ from math import log2, log10, inf
 import pandas as pd
 import re
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.feature_selection import RFE
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score, ShuffleSplit
+from sklearn.decomposition import PCA
+from sklearn.ensemble import ExtraTreesClassifier
+
+def all(data):
+    data.drop(columns=['name'], inplace=True)
+    y = data.loc[:, 'type'].values
+    X = data.drop(columns=['type'])
+    features = X.columns.to_list()
+    df = pd.DataFrame(data={'features': features})
+    top_features = df.features.to_list()
+    return top_features
 
 
+def model_based_selection(data):
+    print("Feature selection by model based selection")
+    data.drop(columns=['name'], inplace=True)
+    y = data.loc[:, 'type'].values
+    X = data.drop(columns=['type'])
+    features = X.columns.to_list()
+    X = X.values
+    rf = RandomForestClassifier()
+    rf.fit(X, y)
+    df = pd.DataFrame(data={'features': features,
+                      'ranking': rf.feature_importances_})
+    df.sort_values(["ranking"], axis="rows", ascending=[False], inplace=True)
+    top_features = df.features.to_list()
+    return top_features
+
+
+def pca_based_selection(data):
+    print("Feature selection by ExtraTreesClassifier")
+    data.drop(columns=['name'], inplace=True)
+    y = data.loc[:, 'type'].values
+    X = data.drop(columns=['type'])
+    features = X.columns.to_list()
+    X = X.values
+    rf = ExtraTreesClassifier()
+    rf.fit(X, y)
+    df = pd.DataFrame(data={'features': features,
+                      'ranking': rf.feature_importances_})
+    df.sort_values(["ranking"], axis="rows", ascending=[False], inplace=True)
+    top_features = df.features.to_list()
+    return top_features
 
 
 def recursive_feature_elimination(data):
@@ -18,16 +60,17 @@ def recursive_feature_elimination(data):
     X = data.drop(columns=['type'])
     features = X.columns.to_list()
     X = X.values
-    #use linear regression as the model
+    # use linear regression as the model
     lr = LinearRegression()
-    #rank all features, i.e continue the elimination until the last one
+    # rank all features, i.e continue the elimination until the last one
     rfe = RFE(lr, n_features_to_select=1)
-    rfe.fit(X,y)
+    rfe.fit(X, y)
     df = pd.DataFrame(data={'features': features,
                       'ranking': rfe.ranking_})
     df.sort_values(["ranking"], axis="rows", ascending=[False], inplace=True)
     top_features = df.features.to_list()
     return top_features
+
 
 def by_mean_decrease_impurity(data):
     print("Feature selection by mean decrease impurity")
@@ -45,6 +88,7 @@ def by_mean_decrease_impurity(data):
     df.sort_values(["ranking"], axis="rows", ascending=[False], inplace=True)
     top_features = df.features.to_list()
     return top_features
+
 
 def by_info_gain(data):
     # the function a dataframe with the features and the labels, and the number of features to select
@@ -112,23 +156,7 @@ def by_info_gain(data):
             df = pd.concat([df, df2])
     df.sort_values(by='info_gain', ascending=False, inplace=True)
     top_features = df['feature'].to_list()
-    top_features_elimination = []
-
-    # my_file = open("permissions.txt", "r")
-    # data = my_file.read()
-    # # replacing end splitting the text 
-    # # when newline ('\n') is seen.
-    # data_into_list = data.split("\n")
-
-    print(len(top_features))
-    for i in range(int(len(top_features))):
-        print(top_features[i][6:])
-        if top_features[i] != 'perm: local' and top_features[i] != 'perm: android' and top_features[i] != 'perm: lh2':
-            top_features_elimination.append(top_features[i])
-    print(len(top_features_elimination))
-    return top_features_elimination
-
-
+    return top_features
 
 
 if __name__ == "__main__":
