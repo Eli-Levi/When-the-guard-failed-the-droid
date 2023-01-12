@@ -40,17 +40,6 @@ def run(data, reports_):
         mani_group = 0
         t, m = machine.keep_same_apks(test[group], mani[group][mani_group])
         mani[group][mani_group].drop(columns=['name'])
-        n_of_f = 0
-        if group == 0:
-            n_of_f = 200
-        elif group == 1:
-            n_of_f = 160
-        elif group == 2:
-            n_of_f = 110
-        elif group == 3:
-            n_of_f = 200
-        elif group == 4:
-            n_of_f = 200
 
         for num_of_features in [110,160]:
             X_train, X_test, X_mani, y_train, y_test, y_mani, top_features = machine.get_X_y_features(
