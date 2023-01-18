@@ -13,7 +13,7 @@ def run(data, reports_):
     reports_path = [reports_ + 'random_forest.csv',
                     reports_ + 'cart.csv', reports_ + 'c45.csv']
     reports_items = [['group', ' ', 'num_of_features', 'features', 'num_of_trees', 'criterion', 'min_samples_split', '',
-                      'test_malicious_recall', 'test_malicious_confusion_matrix', ' ', 'fpr', 'fnr', 'accuracy', 'f1'],
+                      'test_malicious_recall', 'test_malicious_confusion_matrix', ' ', 'tpr'],
                      ['group', 'attack', ' ', 'num_of_features', 'features', 'criterion', 'min_samples_split', '', 'test_malicious_recall',
                          'test_malicious_confusion_matrix', ' ', 'test_manipulated_recall', 'test_manipulated_confusion_matrix', ' ', 'num of observations'],
                      ['group', 'attack', ' ', 'num_of_features', 'features', ' ', 'test_malicious_recall', 'test_malicious_confusion_matrix', ' ', 'test_manipulated_recall', 'test_manipulated_confusion_matrix', ' ', 'num of observations']]
