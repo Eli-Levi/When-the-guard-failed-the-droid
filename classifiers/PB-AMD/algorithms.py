@@ -48,7 +48,7 @@ def kmeans_(X, n_clusters=2):
     return kmeans.fit_predict(X)
 
 
-def random_forest_(X_train, y_train, X_test, y_test, X_test_manipulated, num, criterion, min_samples_split, features):
+def random_forest_(X_train, y_train, X_test, y_test, num, criterion, min_samples_split, features):
     # split the tests
     X_test, X_test2, y_test, y_test2 = train_test_split(
         X_test, y_test, test_size=0.5, random_state=0)

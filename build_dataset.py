@@ -59,13 +59,5 @@ def dividedataset():
     return df
 
 
-# df1 = get_permissions("train_bingn", 0, 0, "train_bingn")
-# df2 = get_permissions("train_malware", 1, 0, "train_malware")
-# df3 = get_permissions("test_bingn", 0, 1, "test_bingn")
-# df4 = get_permissions("test_malware", 1, 1, "test_malware")
-# df5 = get_permissions("test_manipulated", 1, 2, "test_manipulated")
-# df1 = df1.combine_first(df2.combine_first(df3.combine_first(df4.combine_first(df5))))
-# df1 = df1.fillna(0)
-# df1.index.name = "name"
-# df1.to_csv("all.csv")
+
 dividedataset()

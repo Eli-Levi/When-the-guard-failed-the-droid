@@ -14,7 +14,7 @@ def build_reports(reports):
 def get_data(data, list_):
     # the function returns a dataframe with the needed features for the machine
     all_columns = data.columns.to_list()
-    data_columns = ['name', 'type', 'group_num', 'group_mani', 'category']
+    data_columns = ['name', 'type', 'group_num', 'category']
     for l in list_:
         data_columns += [c for c in all_columns if l in c]
     print(len(data_columns))
@@ -26,11 +26,10 @@ def divide_data(data):
     # the dunction divides the data to 5 groups
     import pandas as pd
     import feature_selection
-    train_data, test_data, test_manipulated_data = data[data.category ==
-                                                        0], data[data.category == 1], data[data.category == 2]
+    train_data, test_data = data[data.category == 0], data[data.category == 1]
     train_data.drop(columns=['category'], inplace=True)
     test_data.drop(columns=['category'], inplace=True)
-    test_manipulated_data.drop(columns=['category'], inplace=True)
+    # test_manipulated_data.drop(columns=['category'], inplace=True)
 
     train, test, mani = [], [], []
 
@@ -38,56 +37,45 @@ def divide_data(data):
         train_ = train_data[(train_data.type == 0) |
                             (train_data.group_num == i)]
         train_.reset_index(drop=True, inplace=True)
-        train_.drop(columns=['group_num', 'group_mani'], inplace=True)
+        train_.drop(columns=['group_num'], inplace=True)
         test_ = test_data[(test_data.group_num == i)]
-        test_.drop(columns=['group_num', 'group_mani'], inplace=True)
+        test_.drop(columns=['group_num'], inplace=True)
         test_.reset_index(drop=True, inplace=True)
-        mani_ = test_manipulated_data[(test_manipulated_data.group_num == i)]
-        mani_.drop(columns=['group_num'], inplace=True)
-        m = []
-        t = 0
-        for j in range(1, 7, 1):
-            m.append(mani_[mani_.group_mani == j])
-            m[t].reset_index(drop=True, inplace=True)
-            m[t].drop(columns=['group_mani'], inplace=True)
-            t += 1
         train.append(train_)
         test.append(test_)
-        mani.append(m)
-        # print(train[i].shape,test[i].shape,mani[i][0].shape,mani[i][1].shape,mani[i][2].shape,mani[i][3].shape,mani[i][4].shape,mani[i][5].shape)
 
-    return train, test, mani
+    return train, test
 
 
-def div_data(data, i):
+# def div_data(data, i):
 
-    # the dunction divides the data to 5 groups
-    import pandas as pd
-    import feature_selection
-    train_data, test_data, test_manipulated_data = data[data.category ==
-                                                        0], data[data.category == 1], data[data.category == 2]
-    train_data.drop(columns=['category'], inplace=True)
-    test_data.drop(columns=['category'], inplace=True)
-    test_manipulated_data.drop(columns=['category'], inplace=True)
+#     # the dunction divides the data to 5 groups
+#     import pandas as pd
+#     import feature_selection
+#     train_data, test_data, test_manipulated_data = data[data.category ==
+#                                                         0], data[data.category == 1], data[data.category == 2]
+#     train_data.drop(columns=['category'], inplace=True)
+#     test_data.drop(columns=['category'], inplace=True)
+#     test_manipulated_data.drop(columns=['category'], inplace=True)
 
-    train_data = train_data[(train_data.type == 0) |
-                            (train_data.group_num == i)]
-    train_data.reset_index(drop=True, inplace=True)
-    train_data.drop(columns=['group_num', 'group_mani'], inplace=True)
-    test_data = test_data[test_data.group_num == i]
-    test_data.drop(columns=['group_num', 'group_mani'], inplace=True)
-    test_data.reset_index(drop=True, inplace=True)
-    test_manipulated_data.drop(columns=['group_num'], inplace=True)
-    m = []
-    t = 0
-    for j in range(1, 7, 1):
-        m.append(test_manipulated_data[test_manipulated_data.group_mani == j])
-        m[t].reset_index(drop=True, inplace=True)
-        m[t].drop(columns=['group_mani'], inplace=True)
-        t += 1
-        # print(train[i].shape,test[i].shape,mani[i][0].shape,mani[i][1].shape,mani[i][2].shape,mani[i][3].shape,mani[i][4].shape,mani[i][5].shape)
+#     train_data = train_data[(train_data.type == 0) |
+#                             (train_data.group_num == i)]
+#     train_data.reset_index(drop=True, inplace=True)
+#     train_data.drop(columns=['group_num', 'group_mani'], inplace=True)
+#     test_data = test_data[test_data.group_num == i]
+#     test_data.drop(columns=['group_num', 'group_mani'], inplace=True)
+#     test_data.reset_index(drop=True, inplace=True)
+#     test_manipulated_data.drop(columns=['group_num'], inplace=True)
+#     m = []
+#     t = 0
+#     for j in range(1, 7, 1):
+#         m.append(test_manipulated_data[test_manipulated_data.group_mani == j])
+#         m[t].reset_index(drop=True, inplace=True)
+#         m[t].drop(columns=['group_mani'], inplace=True)
+#         t += 1
+#         # print(train[i].shape,test[i].shape,mani[i][0].shape,mani[i][1].shape,mani[i][2].shape,mani[i][3].shape,mani[i][4].shape,mani[i][5].shape)
 
-    return train_data, test_data, m
+#     return train_data, test_data, m
 
 
 def by_info_gain_and_RFE(X, y):
@@ -98,30 +86,29 @@ def by_info_gain_and_RFE(X, y):
     return selector.get_feature_names_out()
 
 
-def get_X_y_features(num_of_features, features, group, test, train, mani):
+def get_X_y_features(num_of_features, features, group, test, train):
     import pandas as pd
     j = group
     top_features = features[j][0:num_of_features]
 
     train_ = train[j].loc[:, top_features + ['type']]
     test_ = test.loc[:, top_features + ['type']]
-    mani_ = test.loc[:, top_features + ['type']]
+    # mani_ = test.loc[:, top_features + ['type']]
 
     X_train = train_.loc[:, ~train_.columns.isin(['type'])]
     X_test = test_.loc[:, ~test_.columns.isin(['type'])]
-    X_mani = test_.loc[:, ~test_.columns.isin(['type'])]
+    # X_mani = test_.loc[:, ~test_.columns.isin(['type'])]
 
     y_train = train_.type
     y_test = test_.type
-    y_mani = mani_.type
+    # y_mani = mani_.type
 
-    return X_train, X_test, X_mani, y_train, y_test, y_mani, top_features
+    return X_train, X_test, y_train, y_test, top_features
 
 
-def keep_same_apks(test, mani):
+def keep_same_apks(test):
     test['cat'] = 1
-    mani['cat'] = 2
     x = test
     test = x[x.cat == 1]
     test.drop(columns=['cat'], inplace=True)
-    return test, mani
+    return test

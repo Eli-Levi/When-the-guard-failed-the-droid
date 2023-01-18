@@ -3,14 +3,14 @@ import concurrent.futures
 import math
 
 
-def random_forest(num_of_features, features, group, group_mani, report, X_train, X_test, X_test_manipulated, y_train, y_test, y_test_manipulated):
+def random_forest(num_of_features, features, group, report, X_train, X_test, y_train, y_test):
 
     dict1 = {'num of trees': 0, 'criterion': 0,
              'min_samples_split': 0, 'recall': 0, 'confusion matrix': 0}
     dict2 = {'recall': 0, 'confusion matrix': 0}
     # Number of trees in random forest
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        results = [executor.submit(algorithms.random_forest_, X_train, y_train, X_test, y_test, X_test_manipulated, n, criteria,  min_samples_split, features)
+        results = [executor.submit(algorithms.random_forest_, X_train, y_train, X_test, y_test, n, criteria,  min_samples_split, features)
                    for n in range(10, 131, 10) for criteria in ['entropy', 'gini'] for min_samples_split in [3]]
 
     max1, max2 = 0, 0
@@ -21,8 +21,9 @@ def random_forest(num_of_features, features, group, group_mani, report, X_train,
         dict1['num of trees'] = (result[2])
         dict1['criterion'] = (result[3])
         dict1['min_samples_split'] = (result[4])
-        x = [group, group_mani, ' ', num_of_features, features, dict1['num of trees'], dict1['criterion'], dict1['min_samples_split'], ' ',
-             dict1['recall'], dict1['confusion matrix'], ' ', dict2['recall'], dict2['confusion matrix'], ' ', X_test_manipulated.shape[0]]
+        # ['group', ' ', 'num_of_features', 'features', 'num_of_trees', 'criterion', 'min_samples_split', '', 'test_malicious_recall', 'test_malicious_confusion_matrix', ' ', 'num of observations']
+        x = [group, ' ', num_of_features, features, dict1['num of trees'], dict1['criterion'], dict1['min_samples_split'], ' ',
+             dict1['recall'], dict1['confusion matrix'], ' ', X_test.shape[0]]
         r1, r2 = dict1['recall'], dict2['recall']
         if r1 > max1:
             max1 = r1
