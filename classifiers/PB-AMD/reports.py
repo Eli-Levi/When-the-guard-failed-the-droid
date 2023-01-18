@@ -23,7 +23,7 @@ def random_forest(num_of_features, features, group, report, X_train, X_test, y_t
         dict1['min_samples_split'] = (result[4])
         # ['group', ' ', 'num_of_features', 'features', 'num_of_trees', 'criterion', 'min_samples_split', '', 'test_malicious_recall', 'test_malicious_confusion_matrix', ' ', 'num of observations']
         x = [group, ' ', num_of_features, features, dict1['num of trees'], dict1['criterion'], dict1['min_samples_split'], ' ',
-             dict1['recall'], dict1['confusion matrix'], ' ', X_test.shape[0]]
+             dict1['recall'], dict1['confusion matrix'], ' ', dict1['fpr'], dict1['fnr'], dict1['accuracy'], dict1['f1']]
         r1, r2 = dict1['recall'], dict2['recall']
         if r1 > max1:
             max1 = r1
@@ -58,7 +58,8 @@ def old_report_rf(num_of_features, features, group, group_mani, report, X_train,
         dict1['criterion'] = (result[3])
         dict1['min_samples_split'] = (result[4])
         x = [group, group_mani, ' ', num_of_features, features, dict1['num of trees'], dict1['criterion'], dict1['min_samples_split'], ' ',
-             dict1['recall'], dict1['confusion matrix'], ' ', dict2['recall'], dict2['confusion matrix'], ' ', X_test_manipulated.shape[0]]
+             dict1['recall'], dict1['confusion matrix'], ' ', dict2['recall'],
+             dict2['confusion matrix'], ' ', dict1['fpr'], dict1['fnr'], dict1['accuracy'], dict1['f1']]
         r1, r2 = dict1['recall'], dict2['recall']
         if r1 > max1:
             max1 = r1
@@ -75,13 +76,19 @@ def old_report_rf(num_of_features, features, group, group_mani, report, X_train,
 
 def get_perfomances(y, y_pred, dict):
 
-    from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score, precision_score
+    from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, recall_score, det_curve
     import numpy
 
     recall = recall_score(y, y_pred, zero_division=1)
-
+    fpr, fnr, thresholds = det_curve(y, y_pred)
+    f1 = f1_score(y, y_pred, average=None)
+    accuracy = accuracy_score(y, y_pred)
     dict['confusion matrix'] = (numpy.array_str(confusion_matrix(y, y_pred)))
-    dict['recall'] = (round(recall_score(y, y_pred, zero_division=1), 2))
+    dict['recall'] = (round(recall, 2))
+    dict['fpr'] = (fpr)
+    dict['fnr'] = (fnr)
+    dict['accuracy'] = (accuracy)
+    dict['f1'] = (f1)
 
 
 def write_to_csv(file_name, list_):
